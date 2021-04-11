@@ -52,45 +52,43 @@ class Player:
     #asking the player to make their bet
     def player_bet(self):
         while True:
-            bet_input = input("Please place your bet (2 - 500): ")
-
-            if bet_input.isdigit():
-                bet_input = int(bet_input)
-
+            try:
+                print(f"Cash Available: {self.money}")
+                bet_input = int(input("Please place your bet (2 - 500): "))
+            except:
+                print("Please input only a number within the limit range 2 - 500. ")
+                print("\n")
+                continue
+            else:
                 if bet_input > self.money:
                     print("Not enough money to place bet.")
-                    print(f"Current cash on hand: {self.money}")
                     continue
-
-                if bet_input < 2:
-                    print("Please place a bet greater than or equal to 2.")
-                    continue
-                elif bet_input > 500:
-                    print("Please place a bet less than or equal to 500.")
+                elif bet_input < 2 or bet_input > 500:
+                    print("Please input only a number within the limit range 2 - 500. ")
                     continue
                 else:
                     self.bet = bet_input
                     self.money -= self.bet
                     return
-            else:
-                continue
+
 
     #asking the player if they'd like to hit or stand
     def decision(self):
         while True:
             decision = input("\n\nWould you like to Hit or Stand? ")
 
-            if decision.capitalize() == "Hit":
+            if decision[0].capitalize() == "H":
                 return "Hit"
-            elif decision.capitalize() == "Stand":
+            elif decision[0].capitalize() == "S":
                 return "Stand"
             else:
                 print("Please use only Hit or Stand.")
                 continue
 
-
 #to be able to clear output
 from IPython.display import clear_output
+#to enable the ability to sleep/pause the program for game flow
+from time import sleep
 
 #begin the game
 print("Welcome to Blackjack!")
@@ -128,22 +126,20 @@ def calculate_hand_value(player_name, *args):
                     ace_value = 11
                     hand_value += ace_value
                     continue
-
-                #ask the player each time what theyd like for the ace value to be
-                while True:
-                    ace_value = input("Would you like the Ace to count as 1 or 11?")
-
-                    if ace_value.isdigit():
-                        ace_value = int(ace_value)
-
-                        if ace_value == 11:
-                            hand_value += ace_value
-                            break
-                        elif ace_value == 1:
-                            hand_value += ace_value
-                            break
+                else:
+                    #ask the player each time what theyd like for the ace value to be
+                    while True:
+                        try:
+                            ace_value = int(input("Would you like the Ace to count as 1 or 11?"))
+                        except:
+                            print("Please input only 1 or 11.")
+                            continue
                         else:
-                            print("Please select 1 or 11 only.")
+                            if ace_value == 11:
+                                hand_value += ace_value
+                            elif ace_value == 1:
+                                hand_value += ace_value
+                            break
             else:
                 hand_value += c.value
 
@@ -151,18 +147,27 @@ def calculate_hand_value(player_name, *args):
 
 #function to ask player if they'd like to play another round of blackjack
 def continue_game():
-    while True:
-        result = input("Another Round? (True/False): ")
+     while True:
+            try:
+                result = input("Another Round? Yes/No: ")
+            except:
+                print("Please utilize Yes or No only.")
+                continue
+            else:
+                 #if they want another round, clear the player and dealer's hand
+                if result[0].capitalize() == "Y":
+                    player_1.hand = []
+                    dealer.hand = []
+                    return True
+                elif result[0].capitalize() == "N":
+                    return False
+                else:
+                    print("Please utilize Yes or No only.")
+                    continue
 
-        #if they want another round, clear the player and dealer's hand
-        if result.capitalize() == "True":
-            player_1.hand = []
-            dealer.hand = []
-            return True
-        elif result.capitalize() == "False":
-            return False
-        else:
-            print("Please use True or False only.")
+
+
+
 
 
 
@@ -198,7 +203,6 @@ while game_on:
         player_1.bet = 0
         #ask if they'd like another round
         game_on = continue_game()
-        clear_output()
         continue
 
     #while the player has not busted
@@ -240,12 +244,16 @@ while game_on:
         elif player_decision == "Stand":
             break;
 
-    #catch if the user one on first turn and doesn't want to play
+    #catch if the user won on the first turn and doesn't want to play
     if game_on == False:
         break
 
     #dealing the dealers hand
+    sleep(1)
+    clear_output()
     print(f"\n\nDealing cards to {dealer.name}")
+    #put program to sleep to control flow of game
+    sleep(1)
     dealer.hit(deck)
     dealer.hit(deck)
 
@@ -260,6 +268,8 @@ while game_on:
         dealer_hand_value = calculate_hand_value(dealer.name, dealer.hand)
         print(f"Dealers's current card hand value: {dealer_hand_value} \n\n")
 
+        #put program to sleep to control flow of game
+        sleep(2)
 
         #if dealer is over 21, bust
         #if dealer in between 17 and 21, stand
@@ -299,7 +309,7 @@ while game_on:
         print(f"{player_1.name} has lost the round! \n\n")
     elif player_bust == False and dealer_bust == True:
         print(f"{dealer.name} has lost the round! \n\n")
-    else:
+    elif player_bust == True and dealer_bust == True:
         print("Both players have busted!")
 
     #if player is out of money and their bet is set to 0, they automatically lose
@@ -308,8 +318,13 @@ while game_on:
         break
 
     print(f"{player_1.name}'s cash on hand: {player_1.money} \n\n ")
+
+    #reset player & dealer bust values to false
+    player_bust = False
+    dealer_bust = False
     #ask for next round or take winnings home
     game_on = continue_game()
+
 
 
 
@@ -317,5 +332,3 @@ clear_output()
 print("Thank you for playing Blackjack!")
 #print total cash and any they won from rounds including money they won back from betting
 print(f"{player_1.name}'s total cash: {player_1.money} & winnings: {player_1.winnings}")
-
-    
