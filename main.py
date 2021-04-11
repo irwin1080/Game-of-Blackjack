@@ -85,7 +85,7 @@ class Player:
                 print("Please use only Hit or Stand.")
                 continue
 
-#to be able to clear output
+    #to be able to clear output
 from IPython.display import clear_output
 #to enable the ability to sleep/pause the program for game flow
 from time import sleep
@@ -145,6 +145,47 @@ def calculate_hand_value(player_name, *args):
 
     return hand_value
 
+
+#player wins round
+def player_win(player_1, dealer):
+    print(f"{player_1.name} wins round!")
+
+    #allocating bets to player_1 money
+    player_1.money += player_1.bet
+    player_1.money += dealer.bet
+
+    #allocating bets to player_1 winnings
+    player_1.winnings += player_1.bet
+    player_1.winnings += dealer.bet
+
+    print(f"{player_1.name}'s winnings this round: {player_1.bet + dealer.bet} \n\n")
+
+    #setting each player's bet back to 0
+    player_1.bet = 0
+    dealer.bet = 0
+    sleep(1)
+
+
+
+#dealer wins round
+def dealer_win(player_1, dealer):
+    print(f"{dealer.name} wins round!")
+
+    #allocating bets to dealer money
+    dealer.money += player_1.bet
+    dealer.money += dealer.bet
+
+    #removing bet lost from winnings
+    #negative winnings = money lost
+    player_1.winnings -= player_1.bet
+
+    #setting each player's bet back to 0
+    player_1.bet = 0
+    dealer.bet = 0
+    sleep(1)
+
+
+
 #function to ask player if they'd like to play another round of blackjack
 def continue_game():
      while True:
@@ -174,7 +215,13 @@ def continue_game():
 #keep game going until game_on is False
 while game_on:
 
+    print("Placing Bets...")
+    #setting the Dealer's bet to 50
+    print("Dealer Bet: $50 \n")
+    dealer.bet = 50
+    dealer.money -= dealer.bet
 
+    print("Player Bet... ")
     #placing the player's bet; 2 to 500
     player_1.player_bet()
     clear_output()
@@ -198,11 +245,11 @@ while game_on:
     #check for natural blackjack
     if player_hand_value == 21:
         print(f"{player_1.name} wins round!")
-        player_1.money += player_1.bet
-        player_1.winnings += player_1.bet
-        player_1.bet = 0
+        player_win(player_1, dealer)
+
         #ask if they'd like another round
         game_on = continue_game()
+        clear_output()
         continue
 
     #while the player has not busted
@@ -228,19 +275,18 @@ while game_on:
 
             #look for blackjack or bust
             if player_hand_value == 21:
-                print(f"{player_1.name} wins round!")
-                player_1.money += player_1.bet
-                player_1.winnings += player_1.bet
-                player_1.bet = 0
+                player_win(player_1, dealer)
                 player_bust = False
+
                 #ask if they'd like another round
                 game_on = continue_game()
                 clear_output()
                 break
             elif player_hand_value > 21:
                 print(f"{player_1.name} has busted!")
-                player_1.bet = 0
+
                 player_bust = True
+                break
         elif player_decision == "Stand":
             break;
 
@@ -276,10 +322,6 @@ while game_on:
         #if dealer under 16, hit
         if dealer_hand_value > 21:
             print(f"{dealer.name} has busted!")
-            print(f"{player_1.name}'s winnings this round: {player_1.bet} \n\n")
-            player_1.money+=player_1.bet
-            player_1.winnings += player_1.bet
-            player_1.bet = 0
             dealer_bust = True
         elif dealer_hand_value >= 17 and dealer_hand_value <= 21:
             print(f"{dealer.name} stands! \n\n")
@@ -296,25 +338,35 @@ while game_on:
 
         # if the player is closer to 21 than the dealer; player takes bet
         #if the dealer is closer to 21 than the player; dealer takes bet
+        #if equal, player loses
         if player_hand_value > dealer_hand_value:
             print(f"{player_1.name} is closer to 21! \n\n")
-            player_1.money+=player_1.bet
-            player_1.winnings += player_1.bet
-        else:
+            player_win(player_1, dealer)
+        elif player_hand_value < dealer_hand_value:
             print(f"{dealer.name} is closer to 21! \n\n")
-            player_1.bet = 0
+            dealer_win(player_1, dealer)
+        else:
+            print("Draw. Dealer takes all!")
+            dealer_win(player_1, dealer)
+
 
     #both stand but one of the players busted
     if player_bust == True and dealer_bust == False:
-        print(f"{player_1.name} has lost the round! \n\n")
+        print(f"{player_1.name} busted and has lost the round! \n\n")
+        dealer_win(player_1, dealer)
     elif player_bust == False and dealer_bust == True:
-        print(f"{dealer.name} has lost the round! \n\n")
+        print(f"{dealer.name} busted and has lost the round! \n\n")
+        player_win(player_1, dealer)
     elif player_bust == True and dealer_bust == True:
-        print("Both players have busted!")
+        print("Both players have busted! Dealer takes all!")
+        dealer_win(player_1, dealer)
 
     #if player is out of money and their bet is set to 0, they automatically lose
     if player_1.money == 0 and player_1.bet == 0:
         print(f"{player_1.name} is out of money! \n\n")
+        break
+    elif dealer.money == 0 and dealer.bet == 0:
+        print(f"{dealer.name} is out of money! \n\n")
         break
 
     print(f"{player_1.name}'s cash on hand: {player_1.money} \n\n ")
@@ -324,6 +376,7 @@ while game_on:
     dealer_bust = False
     #ask for next round or take winnings home
     game_on = continue_game()
+    clear_output()
 
 
 
@@ -331,4 +384,4 @@ while game_on:
 clear_output()
 print("Thank you for playing Blackjack!")
 #print total cash and any they won from rounds including money they won back from betting
-print(f"{player_1.name}'s total cash: {player_1.money} & winnings: {player_1.winnings}")
+print(f"{player_1.name}'s total cash: {player_1.money} & winnings from cash: {player_1.winnings}")
