@@ -1,12 +1,18 @@
-#to be able to clear output
-from IPython.display import clear_output
 #modules needed to shuffle deck
 import random
+#importing OS module to clear terminal
+import os
+#to enable the ability to sleep/pause the program for game flow
+from time import sleep
 
 #global variables to construct Deck
 card_values = {"1":1, "2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9,
                "Jack":10, "Queen":10, "King":10, "Ace":11,}
 suits = ("Spades", "Clubs", "Hearts", "Diamonds")
+
+#function to clear the terminal
+def clear():
+    os.system('cls')
 
 
 #Card class to create one Card
@@ -85,33 +91,6 @@ class Player:
                 print("Please use only Hit or Stand.")
                 continue
 
-    #to be able to clear output
-from IPython.display import clear_output
-#to enable the ability to sleep/pause the program for game flow
-from time import sleep
-
-#begin the game
-print("Welcome to Blackjack!")
-
-#asking for Player's Name
-name = input("Please input your Player's name: ")
-player_1 = Player(name.capitalize())
-
-#creating the Dealer
-dealer = Player("Dealer")
-
-#allows the game to keep going as long as value is True
-game_on = True
-
-#bool vars to know when either the player or dealer has busted
-player_bust = False
-dealer_bust = False
-
-#create deck
-deck = Deck()
-
-#shuffle the deck
-deck.shuffle()
 
 #function to calculate the value of the passed in player's hand
 def calculate_hand_value(player_name, *args):
@@ -207,10 +186,33 @@ def continue_game():
                     continue
 
 
+'''
+*****************************
+Start of Blackjack Game Logic
+*****************************
+'''
+#begin the game
+print("Welcome to Blackjack!")
 
+#asking for Player's Name and creating Player 1
+name = input("Please input your Player's name: ")
+player_1 = Player(name.capitalize())
 
+#creating the Dealer
+dealer = Player("Dealer")
 
+#allows the game to keep going as long as value is True
+game_on = True
 
+#bool vars to know when either the player or dealer has busted
+player_bust = False
+dealer_bust = False
+
+#create deck
+deck = Deck()
+
+#shuffle the deck
+deck.shuffle()
 
 #keep game going until game_on is False
 while game_on:
@@ -224,9 +226,9 @@ while game_on:
     print("Player Bet... ")
     #placing the player's bet; 2 to 500
     player_1.player_bet()
-    clear_output()
+    clear()
 
-    # deal cards; 2 up & 1 down - player
+    # deal cards; 2 cards to player
     print(f"Dealing cards to {player_1.name}")
 
     #Deal cards to player
@@ -249,15 +251,13 @@ while game_on:
 
         #ask if they'd like another round
         game_on = continue_game()
-        clear_output()
+        clear()
         continue
 
     #while the player has not busted
     while player_bust != True:
-
         #while player is under 21, ask player for hit/stand
         player_decision = player_1.decision()
-
 
         #if hit, check for blackjack or bust
         #if stand, dealers turn
@@ -273,14 +273,14 @@ while game_on:
             player_hand_value = calculate_hand_value(player_1.name, player_1.hand)
             print(f'New hand value: {player_hand_value}')
 
-            #look for blackjack or bust
+            #check for blackjack or bust
             if player_hand_value == 21:
                 player_win(player_1, dealer)
                 player_bust = False
 
                 #ask if they'd like another round
                 game_on = continue_game()
-                clear_output()
+                clear()
                 break
             elif player_hand_value > 21:
                 print(f"{player_1.name} has busted!")
@@ -294,9 +294,9 @@ while game_on:
     if game_on == False:
         break
 
-    #dealing the dealers hand
+    #starting the dealer's turn
     sleep(1)
-    clear_output()
+    clear()
     print(f"\n\nDealing cards to {dealer.name}")
     #put program to sleep to control flow of game
     sleep(1)
@@ -336,7 +336,7 @@ while game_on:
         print(f"{player_1.name}'s Hand Value: {player_hand_value}")
         print(f"{dealer.name}'s Hand Value: {dealer_hand_value} \n\n")
 
-        # if the player is closer to 21 than the dealer; player takes bet
+        #if the player is closer to 21 than the dealer; player takes bet
         #if the dealer is closer to 21 than the player; dealer takes bet
         #if equal, player loses
         if player_hand_value > dealer_hand_value:
@@ -350,7 +350,7 @@ while game_on:
             dealer_win(player_1, dealer)
 
 
-    #both stand but one of the players busted
+    #one of the players busted
     if player_bust == True and dealer_bust == False:
         print(f"{player_1.name} busted and has lost the round! \n\n")
         dealer_win(player_1, dealer)
@@ -369,19 +369,19 @@ while game_on:
         print(f"{dealer.name} is out of money! \n\n")
         break
 
+    #print player's available cash
     print(f"{player_1.name}'s cash on hand: {player_1.money} \n\n ")
-
     #reset player & dealer bust values to false
     player_bust = False
     dealer_bust = False
     #ask for next round or take winnings home
     game_on = continue_game()
-    clear_output()
+    clear()
 
 
 
-
-clear_output()
+#game ended or player chose not to play another round
+clear()
 print("Thank you for playing Blackjack!")
-#print total cash and any they won from rounds including money they won back from betting
-print(f"{player_1.name}'s total cash: {player_1.money} & winnings from cash: {player_1.winnings}")
+#print total cash and their winnnings (calculated into their total cash already)
+print(f"{player_1.name}'s total cash: {player_1.money} & winnings: {player_1.winnings}")
